@@ -39,7 +39,10 @@
             text-align: center;
         }
         #satelliteImage {
-            width: 50%; 
+            width: 50%;
+        }
+        #moonPhase {
+            margin-top: 20px;
         }
     </style>
     <title>Victorian Night Sky Visibility</title>
@@ -52,7 +55,7 @@
         <div id="satelliteImageContainer">
             <img id="satelliteImage" src="" alt="Australian Satellite Image">
         </div>
-        <script>
+		<script>
             function updateSatelliteImage() {
                 var currentDate = new Date();
                 var currentMinute = currentDate.getUTCMinutes();
@@ -67,6 +70,55 @@
             // Update the satellite image on page load
             updateSatelliteImage();
         </script>
+		
+        <div id="moonPhase">
+            <h2>Moon Phase</h2>
+            <p id="moonPhaseData">Loading...</p>
+        </div>
+		<script>
+		// Fetch and display the moon phase data
+        function fetchMoonPhase() {
+            const apiKey = 'JJNTCXYLDY58H6WGCFXMKZ5Z6';
+            const location = 'Victoria,Australia';
+            const apiUrl = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(location)}?unitGroup=metric&key=${apiKey}&contentType=json`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const currentConditions = data.currentConditions;
+                    const moonPhase = currentConditions.moonphase;
+                    const moonPhaseText = getMoonPhaseText(moonPhase);
+
+                    document.getElementById('moonPhaseData').innerText = `Current Moon Phase: ${moonPhaseText}`;
+                })
+                .catch(error => {
+                    console.error('Error fetching moon phase data:', error);
+                    document.getElementById('moonPhaseData').innerText = 'Unable to load moon phase data.';
+                });
+        }
+		fetchMoonPhase()
+
+        function getMoonPhaseText(moonPhase) {
+            if (moonPhase === 0 || moonPhase === 1) {
+                return 'New Moon (0% brightness)';
+            } else if (moonPhase > 0 && moonPhase < 0.25) {
+                return 'Waxing Crescent (1% - 49% brightness)';
+            } else if (moonPhase === 0.25) {
+                return 'First Quarter (50% brightness)';
+            } else if (moonPhase > 0.25 && moonPhase < 0.5) {
+                return 'Waxing Gibbous (51% - 99% brightness)';
+            } else if (moonPhase === 0.5) {
+                return 'Full Moon (100% brightness)';
+            } else if (moonPhase > 0.5 && moonPhase < 0.75) {
+                return 'Waning Gibbous (99% - 51% brightness)';
+            } else if (moonPhase === 0.75) {
+                return 'Last Quarter (50% brightness)';
+            } else {
+                return 'Waning Crescent (49% - 1% brightness)';
+            }
+        }
+		getMoonPhaseText(moonPhase)
+		</script>
         <div id="legend">
             <h2>Legend</h2>
             <table>
@@ -185,7 +237,7 @@
             map.addSource('lightPollution', {
                 'type': 'raster',
                 'tiles': [
-                    'http://40.126.242.217:8080/geoserver/NightSky/wms'
+                    'https://your-geoserver-url/wms?service=WMS&version=1.1.0&request=GetMap&layers=NightSky:worldatlaslightpollutionclippedvictoria&styles=&bbox={bbox-epsg-3857}&width=256&height=256&srs=EPSG:3857&format=image/png'
                 ],
                 'tileSize': 256
             });
@@ -196,7 +248,8 @@
                 'source': 'lightPollution',
                 'paint': {}
             });
-        });*/
+        });
+		*/
 
         // Add measure control to the map
         var measureControl = new MapboxMeasure({
@@ -217,6 +270,8 @@
         map.on('mouseleave', 'places', function () {
             map.getCanvas().style.cursor = '';
         });
+
+        
     </script>
 </body>
 </html>
