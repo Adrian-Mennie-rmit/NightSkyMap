@@ -6,13 +6,7 @@
     <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="stylesheet" href="css/leaflet.css">
-    <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
-    <link rel="stylesheet" href="css/L.Control.Locate.min.css">
-    <link rel="stylesheet" href="css/qgis2web.css">
-    <link rel="stylesheet" href="css/fontawesome-all.min.css">
-    <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
-    <link rel="stylesheet" href="css/leaflet-measure.css">
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css' rel='stylesheet' />
     <style>
         body {
             display: flex;
@@ -44,12 +38,10 @@
             padding: 8px;
             text-align: center;
         }
+        #satelliteImage {
+            width: 50%; 
+        }
     </style>
-	<style>
-    #satelliteImage {
-        width: 50%; 
-    }
-</style>
     <title>Victorian Night Sky Visibility</title>
 </head>
 <body>
@@ -57,25 +49,25 @@
     <div id="sidebar">
         <h1>Victorian Night Sky Visibility</h1>
         <p>This map shows the visibility of the night sky in Victoria. Below you can see the latest colour coverage image from Himawari-8</p>
-		<p>Layer not loading? Geoserver may be off. Please contact me.</p>
-		<div id="satelliteImageContainer">
-    <img id="satelliteImage" src="" alt="Australian Satellite Image">
-</div>
-<script>
-function updateSatelliteImage() {
-    var currentDate = new Date();
-    var currentMinute = currentDate.getUTCMinutes();
-    var currentMinuteRounded = Math.floor(currentMinute / 10) * 10 -20; // Round down to nearest 10 minutes
-    var currentHour = currentDate.getUTCHours();
-    // Formatting the minute part to have leading zero if necessary
-    var formattedMinute = ('0' + currentMinuteRounded).slice(-2);
-    var imageUrl = "https://www.data.jma.go.jp/mscweb/data/himawari/img/aus/aus_b13_" + ("0" + currentHour).slice(-2) + formattedMinute + ".jpg";
-    // Update the image source
-    document.getElementById("satelliteImage").src = imageUrl;
-}
-// Update the satellite image on page load
-updateSatelliteImage();
-</script>
+        <p>Layer not loading? Geoserver may be off. Please contact me.</p>
+        <div id="satelliteImageContainer">
+            <img id="satelliteImage" src="" alt="Australian Satellite Image">
+        </div>
+        <script>
+            function updateSatelliteImage() {
+                var currentDate = new Date();
+                var currentMinute = currentDate.getUTCMinutes();
+                var currentMinuteRounded = Math.floor(currentMinute / 10) * 10 - 20; // Round down to nearest 10 minutes
+                var currentHour = currentDate.getUTCHours();
+                // Formatting the minute part to have leading zero if necessary
+                var formattedMinute = ('0' + currentMinuteRounded).slice(-2);
+                var imageUrl = "https://www.data.jma.go.jp/mscweb/data/himawari/img/aus/aus_b13_" + ("0" + currentHour).slice(-2) + formattedMinute + ".jpg";
+                // Update the image source
+                document.getElementById("satelliteImage").src = imageUrl;
+            }
+            // Update the satellite image on page load
+            updateSatelliteImage();
+        </script>
         <div id="legend">
             <h2>Legend</h2>
             <table>
@@ -85,7 +77,7 @@ updateSatelliteImage();
                     <th>Approximate total brightness (mcd/m²)</th>
                     <th>Colour</th>
                 </tr>
-                
+                <!-- Legend content -->
                 <tr>
                     <td>0.01–0.02</td>
                     <td>1.74–3.48</td>
@@ -167,146 +159,65 @@ updateSatelliteImage();
             </table>
         </div>
     </div>
-	<script src="js/qgis2web_expressions.js"></script> 
-    <script src="js/leaflet.js"></script>
-    <script src="js/L.Control.Layers.Tree.min.js"></script>
-    <script src="js/L.Control.Locate.min.js"></script>
-    <script src="js/leaflet.rotatedMarker.js"></script>
-    <script src="js/leaflet.pattern.js"></script>
-    <script src="js/leaflet-hash.js"></script>
-    <script src="js/Autolinker.min.js"></script>
-    <script src="js/rbush.min.js"></script>
-    <script src="js/labelgun.min.js"></script>
-    <script src="js/labels.js"></script>
-    <script src="js/leaflet.wms.js"></script>
-    <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
-    <script src="js/leaflet-measure.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js'></script>
     <script>
-        var highlightLayer;
-       /* function highlightFeature(e) {
-            highlightLayer = e.target;
+        // Set the Mapbox access token
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYW1lbm5pZSIsImEiOiJjbGV3MGFzeTUwYWlxM3lqdjNwd3hqbXBtIn0.HblDwCTJqEY9gk-DPHDNnA';
 
-            if (e.target.feature.geometry.type === 'LineString' || e.target.feature.geometry.type === 'MultiLineString') {
-                highlightLayer.setStyle({
-                    color: '#ffff00',
-                });
-            } else {
-                highlightLayer.setStyle({
-                    fillColor: '#ffff00',
-                    fillOpacity: 1
-                });
-            }
-            //highlightLayer.openPopup();
-        }*/
+        // Initialize the Mapbox map
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/amennie/clwfrnx2c008l01rb6zomelkq',
+            center: [144.9631, -37.8136], // Centered on Victoria
+            zoom: 7
+        });
 
-        var map = L.map('map', {
-            zoomControl: true, maxZoom: 28, minZoom: 7
-        }).fitBounds([[-40.76497330285802, 138.5249514973621], [-30.961747615855423, 151.14505342607305]]);
-        var hash = new L.Hash(map);
+        // Add navigation controls to the map
+        map.addControl(new mapboxgl.NavigationControl());
 
-        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a> &middot; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &middot; <a href="https://www.science.org/doi/10.1126/sciadv.1600377">Falchi et al.</a>');
-        var autolinker = new Autolinker({ truncate: { length: 30, location: 'smart' } });
+        // Add Geocoder control to the map
+        map.addControl(new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        }));
 
-       /* function removeEmptyRowsFromPopupContent(content, feature) {
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = content;
-            var rows = tempDiv.querySelectorAll('tr');
-            for (var i = 0; i < rows.length; i++) {
-                var td = rows[i].querySelector('td.visible-with-data');
-                var key = td ? td.id : '';
-                if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
-                    rows[i].parentNode.removeChild(rows[i]);
-                }
-            }
-            return tempDiv.innerHTML;
-        }
+        /* Add the light pollution layer from Mapbox style
+        map.on('load', function () {
+            map.addSource('lightPollution', {
+                'type': 'raster',
+                'tiles': [
+                    'http://40.126.242.217:8080/geoserver/NightSky/wms'
+                ],
+                'tileSize': 256
+            });
 
-        /*document.querySelector(".leaflet-popup-pane").addEventListener("load", function (event) {
-            var tagName = event.target.tagName,
-                popup = map._popup;
-            // Also check if flag is already set.
-            if (tagName === "IMG" && popup && !popup._updated) {
-                popup._updated = true; // Set flag to prevent looping.
-                popup.update();
-            }
-        }, true);*/
+            map.addLayer({
+                'id': 'lightPollutionLayer',
+                'type': 'raster',
+                'source': 'lightPollution',
+                'paint': {}
+            });
+        });*/
 
-        L.control.locate({ locateOptions: { maxZoom: 19 } }).addTo(map);
-
-        var measureControl = new L.Control.Measure({
-            position: 'topleft',
+        // Add measure control to the map
+        var measureControl = new MapboxMeasure({
+            position: 'top-left',
             primaryLengthUnit: 'meters',
             secondaryLengthUnit: 'kilometers',
             primaryAreaUnit: 'sqmeters',
             secondaryAreaUnit: 'hectares'
         });
-        measureControl.addTo(map);
-        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
-            .innerHTML = '';
-        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
-            .className += ' fas fa-ruler';
+        map.addControl(measureControl, 'top-left');
 
-        var bounds_group = new L.featureGroup([]);
-        function setBounds() {
-            map.setMaxBounds(map.getBounds());
-        }
-
-        map.createPane('pane_OpenStreetMap_0');
-        map.getPane('pane_OpenStreetMap_0').style.zIndex = 400;
-        var layer_OpenStreetMap_0 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            pane: 'pane_OpenStreetMap_0',
-            opacity: 1.0,
-            attribution: '',
-            minZoom: 7,
-            maxZoom: 28,
-            minNativeZoom: 6,
-            maxNativeZoom: 19
+        // Change the cursor to a pointer when the mouse is over the places layer
+        map.on('mouseenter', 'places', function () {
+            map.getCanvas().style.cursor = 'pointer';
         });
-        layer_OpenStreetMap_0;
-        map.addLayer(layer_OpenStreetMap_0);
 
-        map.createPane('pane_worldatlaslightpollutionclippedvictoria_1');
-        map.getPane('pane_worldatlaslightpollutionclippedvictoria_1').style.zIndex = 401;
-        var layer_worldatlaslightpollutionclippedvictoria_1 = L.WMS.layer("http://40.126.242.217:8080/geoserver/NightSky/wms", "world atlas light pollution clipped victoria", {
-            pane: 'pane_worldatlaslightpollutionclippedvictoria_1',
-            format: 'image/png',
-            uppercase: true,
-            transparent: true,
-            continuousWorld: true,
-            tiled: true,
-            info_format: 'text/plain',
-            opacity: 1,
-            attribution: '',
+        // Change it back to a pointer when it leaves
+        map.on('mouseleave', 'places', function () {
+            map.getCanvas().style.cursor = '';
         });
-        map.addLayer(layer_worldatlaslightpollutionclippedvictoria_1);
-		
-
-        var osmGeocoder = new L.Control.Geocoder({
-            collapsed: true,
-            position: 'topleft',
-            text: 'Search',
-            title: 'Testing'
-        }).addTo(map);
-        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
-            .className += ' fa fa-search';
-        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
-            .title += 'Search for a place';
-
-        var baseMaps = {};
-        var overlaysTree = [
-            { label: "world atlas light pollution clipped victoria", layer: layer_worldatlaslightpollutionclippedvictoria_1 },
-            { label: "OpenStreetMap", layer: layer_OpenStreetMap_0 },]
-        var lay = L.control.layers.tree(null, overlaysTree, {
-            //namedToggle: true,
-            //selectorBack: false,
-            //closedSymbol: '&#8862; &#x1f5c0;',
-            //openedSymbol: '&#8863; &#x1f5c1;',
-            //collapseAll: 'Collapse all',
-            //expandAll: 'Expand all',
-            collapsed: true,
-        });
-        lay.addTo(map);
-        setBounds();
     </script>
 </body>
 </html>
