@@ -232,12 +232,12 @@
             mapboxgl: mapboxgl
         }));
 
-        /* Add the light pollution layer from Mapbox style
+        /* Add the light pollution layer from geoserver (NOT CURRENTLY IN USE)
         map.on('load', function () {
             map.addSource('lightPollution', {
                 'type': 'raster',
                 'tiles': [
-                    'https://your-geoserver-url/wms?service=WMS&version=1.1.0&request=GetMap&layers=NightSky:worldatlaslightpollutionclippedvictoria&styles=&bbox={bbox-epsg-3857}&width=256&height=256&srs=EPSG:3857&format=image/png'
+                    'WMS URL'
                 ],
                 'tileSize': 256
             });
